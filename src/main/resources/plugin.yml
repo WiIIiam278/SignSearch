@@ -1,0 +1,10 @@
+name: SignSearch
+version: ${project.version}
+main: me.william278.signsearch.SignSearch
+api-version: 1.16
+authors: [William278]
+description: Asynchronously search signs matching text near you
+commands:
+  signsearch:
+    usage: /signsearch <text>
+    description: Search nearby signs for text
