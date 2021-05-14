@@ -1,4 +1,4 @@
-# SignSearch
+[![Header](https://i.imgur.com/Q9PUEof.png)](https://github.com/WiIIiam278/SignSearch/)
 [![Discord](https://img.shields.io/discord/818135932103557162?color=7289da&logo=discord)](https://discord.gg/tVYhJfyDWG)
 
 **SignSearch** is a simple plugin that lets you asynchronously search nearby signs for text.
