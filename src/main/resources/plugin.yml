@@ -8,3 +8,4 @@ commands:
   signsearch:
     usage: /signsearch <text>
     description: Search nearby signs for matching text
+    aliases: [ss]
