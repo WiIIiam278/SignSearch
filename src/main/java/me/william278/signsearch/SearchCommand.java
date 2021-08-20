@@ -1,8 +1,8 @@
 package me.william278.signsearch;
 
+import de.themoep.minedown.MineDown;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -16,7 +16,7 @@ import org.bukkit.util.Vector;
 
 import java.util.HashSet;
 
-public class onSearchCommand implements CommandExecutor {
+public class SearchCommand implements CommandExecutor {
 
     private String truncate(double dbl) {
         String truncatedDouble = Double.toString(dbl);
@@ -52,37 +52,43 @@ public class onSearchCommand implements CommandExecutor {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
                         for (int y = location.getBlockY() - 20; (y < location.getBlockY() + 30 || y < chunkSnapshot.getHighestBlockYAt(x, z)); y++) {
-                            if (y < 0) { y = 0; }
+                            if (y < 0) {
+                                y = 0;
+                            }
                             if (chunkSnapshot.getBlockData(x, y, z) instanceof org.bukkit.block.data.type.Sign) {
                                 int finalY = y;
                                 int finalX = x;
                                 int finalZ = z;
-                                Bukkit.getScheduler().runTask(plugin, () -> {
-                                    results.add(player.getWorld().getChunkAt(chunkSnapshot.getX(), chunkSnapshot.getZ()).getBlock(finalX, finalY, finalZ).getLocation());
-                                });
+                                Bukkit.getScheduler().runTask(plugin, () -> results.add(player.getWorld().getChunkAt(chunkSnapshot.getX(), chunkSnapshot.getZ()).getBlock(finalX, finalY, finalZ).getLocation()));
                             }
                         }
                     }
                 }
             }
-            Bukkit.getScheduler().runTask(plugin, () -> {
-               findText(results, player, search);
-            });
+            Bukkit.getScheduler().runTask(plugin, () -> findText(results, player, search));
         });
     }
 
     private void findText(HashSet<Location> results, Player player, String search) {
         if (results.isEmpty()) {
-            player.sendMessage(ChatColor.RED + "Couldn't find any nearby signs.");
+            player.spigot().sendMessage(new MineDown("[Couldn't find any nearby signs.](#ff3300)").toComponent());
             return;
         }
         double distance = 100000D;
         Location finalLocation = null;
         for (Location l : results) {
+            if (l.getWorld() == null) {
+                continue;
+            }
             Block block = l.getWorld().getBlockAt(l);
             BlockState blockState = block.getState();
-            Sign sign = (Sign) blockState;
-            for (String s : sign.getLines()) {
+            Sign signBlock = (Sign) blockState;
+            signBlock.setLine(0, signBlock.getLines()[0]);
+            signBlock.setLine(1, signBlock.getLines()[1]);
+            signBlock.setLine(2, signBlock.getLines()[2]);
+            signBlock.setLine(3, signBlock.getLines()[3]);
+            signBlock.update(true);
+            for (String s : signBlock.getLines()) {
                 if (s.toLowerCase().contains(search.toLowerCase())) {
                     double tmpDistance = player.getLocation().distance(l);
                     if (tmpDistance < distance) {
@@ -94,27 +100,35 @@ public class onSearchCommand implements CommandExecutor {
         }
         if (finalLocation != null) {
             faceDirection(player, finalLocation);
-            player.sendMessage(ChatColor.GREEN + "Found a sign " + truncate(distance) + " blocks away containing \"" + search + "\" at (" + truncate(finalLocation.getX()) +
-                    ", " + truncate(finalLocation.getY()) + ", " + truncate(finalLocation.getZ()) + ")");
+            player.spigot().sendMessage(new MineDown("[Found a matching sign](#00fb9a) [" + truncate(distance) + "](#00fb9a bold) [blocks away, at \\(" + truncate(finalLocation.getX())
+                    + ", " + truncate(finalLocation.getY()) + ", " + truncate(finalLocation.getZ()) + "\\)](#00fb9a)").toComponent());
             return;
         }
-        player.sendMessage(ChatColor.RED + "Couldn't find any signs with \"" + search + "\"");
+        player.spigot().sendMessage(new MineDown("[Couldn't find any nearby signs.](#ff3300)").toComponent());
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (sender instanceof Player player) {
             if (args.length >= 1) {
                 StringBuilder searchText = new StringBuilder();
+                int chunkRadius = 2;
                 for (String argument : args) {
-                    searchText.append(argument).append(" ");
+                    if (argument.contains("-radius:")) {
+                        try {
+                            chunkRadius = Integer.parseInt(argument.split(":")[1]);
+                        } catch (NumberFormatException e) {
+                            searchText.append(argument).append(" ");
+                        }
+                    } else {
+                        searchText.append(argument).append(" ");
+                    }
                 }
                 String search = StringUtils.removeEnd(searchText.toString(), " ");
-                player.sendMessage(ChatColor.GRAY + "Searching...");
-                search(search, player.getLocation(), player, 2);
+                player.spigot().sendMessage(new MineDown("[Searching for matching signs...](gray)").toComponent());
+                search(search, player.getLocation(), player, chunkRadius);
             } else {
-                player.sendMessage(ChatColor.DARK_RED + "Error: " + ChatColor.RED + "Invalid syntax. Usage: " + command.getUsage());
+                player.spigot().sendMessage(new MineDown("[Error:](#ff3300) [Incorrect syntax. Usage: " + command.getUsage() + "](#ff7e5e)").toComponent());
             }
             return true;
         }

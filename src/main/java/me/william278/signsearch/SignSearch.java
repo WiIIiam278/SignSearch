@@ -20,14 +20,14 @@ public final class SignSearch extends JavaPlugin {
         // Plugin startup logic
         setInstance(this);
 
-        getLogger().info("Enabled SignSearch");
+        getLogger().info("Successfully enabled SignSearch version " + getDescription().getVersion());
 
-        this.getCommand("signsearch").setExecutor(new onSearchCommand());
+        getCommand("signsearch").setExecutor(new SearchCommand());
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        getLogger().info("Disabled SignSearch");
+        getLogger().info("Disabled SignSearch version " + getDescription().getVersion());
     }
 }
