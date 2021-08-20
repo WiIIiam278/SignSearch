@@ -8,6 +8,8 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -55,7 +57,8 @@ public class SearchCommand implements CommandExecutor {
                             if (y < 0) {
                                 y = 0;
                             }
-                            if (chunkSnapshot.getBlockData(x, y, z) instanceof org.bukkit.block.data.type.Sign) {
+                            final BlockData blockData = chunkSnapshot.getBlockData(x, y, z);
+                            if (blockData instanceof org.bukkit.block.data.type.Sign || blockData instanceof WallSign) {
                                 int finalY = y;
                                 int finalX = x;
                                 int finalZ = z;
@@ -83,11 +86,6 @@ public class SearchCommand implements CommandExecutor {
             Block block = l.getWorld().getBlockAt(l);
             BlockState blockState = block.getState();
             Sign signBlock = (Sign) blockState;
-            signBlock.setLine(0, signBlock.getLines()[0]);
-            signBlock.setLine(1, signBlock.getLines()[1]);
-            signBlock.setLine(2, signBlock.getLines()[2]);
-            signBlock.setLine(3, signBlock.getLines()[3]);
-            signBlock.update(true);
             for (String s : signBlock.getLines()) {
                 if (s.toLowerCase().contains(search.toLowerCase())) {
                     double tmpDistance = player.getLocation().distance(l);
