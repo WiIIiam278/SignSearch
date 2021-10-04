@@ -54,7 +54,11 @@ public class SearchCommand implements CommandExecutor {
             for (ChunkSnapshot chunkSnapshot : checkingChunks) {
                 for (int x = 0; x <= 15; x++) {
                     for (int z = 0; z <= 15; z++) {
-                        for (int y = location.getBlockY() - 20; (y < location.getBlockY() + 30 || y < chunkSnapshot.getHighestBlockYAt(x, z)); y++) {
+                        int highestBlock = chunkSnapshot.getHighestBlockYAt(x, z);
+                        if (highestBlock > 256) {
+                            highestBlock = 256;
+                        }
+                        for (int y = location.getBlockY() - 20; (y < location.getBlockY() + 30 || y < highestBlock); y++) {
                             try {
                                 if (y < 0) {
                                     y = 0;
