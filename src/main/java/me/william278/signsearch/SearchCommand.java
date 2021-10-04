@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.HashSet;
+import java.util.logging.Level;
 
 public class SearchCommand implements CommandExecutor {
 
@@ -51,18 +52,22 @@ public class SearchCommand implements CommandExecutor {
             }
 
             for (ChunkSnapshot chunkSnapshot : checkingChunks) {
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
+                for (int x = 0; x <= 15; x++) {
+                    for (int z = 0; z <= 15; z++) {
                         for (int y = location.getBlockY() - 20; (y < location.getBlockY() + 30 || y < chunkSnapshot.getHighestBlockYAt(x, z)); y++) {
-                            if (y < 0) {
-                                y = 0;
-                            }
-                            final BlockData blockData = chunkSnapshot.getBlockData(x, y, z);
-                            if (blockData instanceof org.bukkit.block.data.type.Sign || blockData instanceof WallSign) {
-                                int finalY = y;
-                                int finalX = x;
-                                int finalZ = z;
-                                Bukkit.getScheduler().runTask(plugin, () -> results.add(player.getWorld().getChunkAt(chunkSnapshot.getX(), chunkSnapshot.getZ()).getBlock(finalX, finalY, finalZ).getLocation()));
+                            try {
+                                if (y < 0) {
+                                    y = 0;
+                                }
+                                final BlockData blockData = chunkSnapshot.getBlockData(x, y, z);
+                                if (blockData instanceof org.bukkit.block.data.type.Sign || blockData instanceof WallSign) {
+                                    int finalY = y;
+                                    int finalX = x;
+                                    int finalZ = z;
+                                    Bukkit.getScheduler().runTask(plugin, () -> results.add(player.getWorld().getChunkAt(chunkSnapshot.getX(), chunkSnapshot.getZ()).getBlock(finalX, finalY, finalZ).getLocation()));
+                                }
+                            } catch (ArrayIndexOutOfBoundsException ignored) {} catch (Exception e) {
+                                plugin.getLogger().log(Level.WARNING, "An exception occurred performing a sign search", e);
                             }
                         }
                     }

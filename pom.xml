@@ -6,7 +6,7 @@
 
     <groupId>me.William278</groupId>
     <artifactId>SignSearch</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>SignSearch</name>
@@ -43,11 +43,11 @@
                     <relocations>
                         <relocation>
                             <pattern>de.themoep.minedown</pattern>
-                            <shadedPattern>me.william278.signsearch.minedown</shadedPattern>
+                            <shadedPattern>me.william278.signsearch.libraries.minedown</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>org.bstats</pattern>
-                            <shadedPattern>me.william278.signsearch.bstats</shadedPattern>
+                            <shadedPattern>me.william278.signsearch.libraries.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
