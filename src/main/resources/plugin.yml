@@ -1,6 +1,6 @@
 name: SignSearch
 version: ${project.version}
-main: me.william278.signsearch.SignSearch
+main: net.william278.signsearch.SignSearch
 api-version: 1.16
 authors: [William278]
 description: ${project.description}

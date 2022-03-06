@@ -1,4 +1,4 @@
-package me.william278.signsearch;
+package net.william278.signsearch;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;

@@ -1,4 +1,4 @@
-package me.william278.signsearch;
+package net.william278.signsearch;
 
 import de.themoep.minedown.MineDown;
 import org.apache.commons.lang.StringUtils;
@@ -28,19 +28,25 @@ public class SearchCommand implements CommandExecutor {
 
     private static final SignSearch plugin = SignSearch.getInstance();
 
+    // Teleport a player to face a location
     private void faceDirection(Player player, Location target) {
         target.setX(target.getX() + 0.5);
         target.setY(target.getY() + 0.5);
         target.setZ(target.getZ() + 0.5);
-        Vector dir = target.clone().subtract(player.getEyeLocation()).toVector();
-        Location loc = player.getLocation().setDirection(dir);
-        player.teleport(loc);
+        Vector direction = target.clone().subtract(player.getEyeLocation()).toVector();
+        Location adjustedLocation = player.getLocation().setDirection(direction);
+        player.teleport(adjustedLocation);
     }
 
+    // Search for nearby signs
     private void search(String search, Location location, Player player, int chunkRadius) {
-        HashSet<Location> results = new HashSet<>();
+        final HashSet<Location> results = new HashSet<>();
+
+        final int worldMaxHeight = player.getWorld().getMaxHeight();
+        final int worldMinHeight = player.getWorld().getMinHeight();
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            HashSet<ChunkSnapshot> checkingChunks = new HashSet<>();
+            final HashSet<ChunkSnapshot> checkingChunks = new HashSet<>();
             for (int chunkCheckX = location.getChunk().getX() - (chunkRadius);
                  chunkCheckX <= location.getChunk().getX() + (chunkRadius);
                  chunkCheckX++) {
@@ -55,13 +61,13 @@ public class SearchCommand implements CommandExecutor {
                 for (int x = 0; x <= 15; x++) {
                     for (int z = 0; z <= 15; z++) {
                         int highestBlock = chunkSnapshot.getHighestBlockYAt(x, z);
-                        if (highestBlock > 256) {
-                            highestBlock = 256;
+                        if (highestBlock > worldMaxHeight) {
+                            highestBlock = worldMaxHeight;
                         }
                         for (int y = location.getBlockY() - 20; (y < location.getBlockY() + 30 || y < highestBlock); y++) {
                             try {
-                                if (y < 0) {
-                                    y = 0;
+                                if (y < worldMinHeight) {
+                                    y = worldMinHeight;
                                 }
                                 final BlockData blockData = chunkSnapshot.getBlockData(x, y, z);
                                 if (blockData instanceof org.bukkit.block.data.type.Sign || blockData instanceof WallSign) {
@@ -70,7 +76,8 @@ public class SearchCommand implements CommandExecutor {
                                     int finalZ = z;
                                     Bukkit.getScheduler().runTask(plugin, () -> results.add(player.getWorld().getChunkAt(chunkSnapshot.getX(), chunkSnapshot.getZ()).getBlock(finalX, finalY, finalZ).getLocation()));
                                 }
-                            } catch (ArrayIndexOutOfBoundsException ignored) {} catch (Exception e) {
+                            } catch (ArrayIndexOutOfBoundsException ignored) {
+                            } catch (Exception e) {
                                 plugin.getLogger().log(Level.WARNING, "An exception occurred performing a sign search", e);
                             }
                         }
